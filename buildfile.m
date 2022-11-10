@@ -29,7 +29,7 @@ plan("test").Inputs = [...
     files(plan, "toolbox/**/*.m")];
 
 plan("toolbox").Dependencies = ["lint", "test", "doc", "pcodeHelp"];
-plan("toolbox").Inputs = files(plan, ["pcode", "mex", "toolbox", "Mass-Spring-Damper.prj"]);
+plan("toolbox").Inputs = files(plan, ["pcode", "mex", "toolbox", "ToolboxPackaging.prj"]);
 plan("toolbox").Outputs = files(plan, "release/*.mltbx");
 
 plan("doc").Dependencies = "docTest";
@@ -42,12 +42,16 @@ plan("docTest").Inputs = [...
     plan("pcode").Outputs, ...
     files(plan, "test/doc/**/*.m")];
 
-plan("install").Dependencies = "integTest";
-plan("integTest").Dependencies = "toolbox";
-plan("integTest").Inputs = files(plan, ["toolbox", "tests"]);
+plan("integTest").Inputs = [...
+    plan("toolbox").Outputs, ...
+    files(plan, "tests")];
 
-plan("lintAll") = matlab.buildtool.Task("Description","Find code issues in source and tests");
-plan("lintAll").Dependencies = ["lint", "lintTests"];
+
+plan("install").Dependencies = "integTest";
+
+plan("lintAll") = matlab.buildtool.Task(...
+    Description="Find code issues in source and tests",...
+    Dependencies=["lint", "lintTests"]);
 
 plan.DefaultTasks = "integTest";
 end
@@ -147,9 +151,9 @@ end
 
 function toolboxTask(~)
 % Create an mltbx toolbox package
-outputFile = "release/Mass-Spring-Damper.mltbx";
+outputFile = "release/msd.mltbx";
 disp("Packaging toolbox: " + outputFile);
-matlab.addons.toolbox.packageToolbox("Mass-Spring-Damper.prj",outputFile);
+matlab.addons.toolbox.packageToolbox("ToolboxPackaging.prj",outputFile);
 
 end
 
@@ -233,7 +237,7 @@ deleteFiles(outputs.paths);
 
 end
 
-function integTestTask(~)
+function integTestTask(ctx)
 % Run integration tests
 
 sourceFile = which("simulateSystem");
@@ -245,7 +249,7 @@ pathCleaner = onCleanup(@() path(origPath));
 
 % Install Toolbox
 
-tbx = matlab.addons.toolbox.installToolbox("release/Mass-Spring-Damper.mltbx");
+tbx = matlab.addons.toolbox.installToolbox(ctx.Inputs(1).paths);
 tbxCleaner = onCleanup(@() matlab.addons.toolbox.uninstallToolbox(tbx));
 
 assert(~strcmp(sourceFile,which("simulateSystem")), ...
