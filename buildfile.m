@@ -82,6 +82,7 @@ end
 end
 
 function loadTask(ctx)
+% Load the project
 matlab.project.loadProject(ctx.Plan.RootFolder);
 end
 
