@@ -2,15 +2,18 @@ function plan = buildfile
 
 plan = buildplan(localfunctions);
 
-[plan(["test", "docTest"]).Dependencies] = deal("load");
 plan("mex").Inputs = files(plan, "mex/**/*.c");
-plan("mex").Outputs = files(plan, "toolbox/**/*." + mexext);
+plan("mex").Outputs = files(plan, ...
+    plan("mex").Inputs.paths.replace("mex/","toolbox/").replace(".c", "." + mexext));
+%plan("mex").Outputs = replace(plan("mex").Inputs, "mex/","toolbox/").replace(".c", "." + mexext);
 
 plan("pcode").Inputs = files(plan, "pcode/**/*.m");
 plan("pcode").Outputs = files(plan, "toolbox/**/*.p");
 plan("pcode").Dependencies = "pcodeHelp";
+
 plan("pcodeHelp").Inputs = plan("pcode").Inputs;
 plan("pcodeHelp").Outputs = files(plan, plan("pcodeHelp").Inputs.paths.replace("pcode/", "toolbox/"));
+%plan("pcodeHelp").Outputs = replace(plan("pcodeHelp").Inputs,"pcode/", "toolbox/");
 
 plan("lint").Inputs = files(plan, ["toolbox/**/*.m", "pcode/**/*.m"]); % Want to use this for finding files to operate on but dont want incremental
 
@@ -24,7 +27,10 @@ plan("doc").Dependencies = "docTest";
 plan("doc").Inputs = files(plan, "toolbox/doc/**/*.mlx");
 plan("doc").Outputs = files(plan, "toolbox/doc/**/*.html");
 
-plan("docTest").Inputs = files(plan, ["toolbox/doc/**/*.mlx" "test/doc/**/*.m"]);
+plan("docTest").Inputs = [...
+    plan("doc").Inputs, ...
+    plan("pcode").Outputs, ...
+    files(plan, "test/doc/**/*.m")];
 
 plan("install").Dependencies = "integTest";
 plan("integTest").Dependencies = "toolbox";
@@ -36,6 +42,43 @@ plan("lintAll").Dependencies = ["lint", "lintTests"];
 plan.DefaultTasks = "integTest";
 end
 
+function plan = alternativeBuild
+
+plan = buildplan(localfunctions);
+
+plan("mex").Inputs = "mex/**/*.c";
+plan("mex").Outputs = plan("mex").Inputs.replace("mex/","toolbox/").replace(".c", "." + mexext);
+
+plan("pcode").Inputs = "pcode/**/*.m";
+plan("pcode").Outputs = plan("pcodeHelp").Inputs.replace("pcode/", "toolbox/").replace(".m", ".p");
+plan("pcode").Dependencies = "pcodeHelp";
+
+plan("pcodeHelp").Inputs = plan("pcode").Inputs;
+plan("pcodeHelp").Outputs = plan("pcodeHelp").Inputs.replace("pcode/", "toolbox/");
+
+plan("lint").Inputs = ["toolbox/**/*.m", "pcode/**/*.m"]; % Want to use this for finding files to operate on but dont want incremental
+
+plan("test").Inputs = plan(["mex" "pcode"]);
+
+plan("toolbox").Dependencies = ["lint", "test", "doc", "pcodeHelp"];
+plan("toolbox").Inputs = ["pcode", "mex", "toolbox"];
+plan("toolbox").Outputs = "release/*.mltbx";
+
+plan("doc").Dependencies = "docTest";
+plan("doc").Inputs = "toolbox/doc/**/*.mlx";
+plan("doc").Outputs = "toolbox/doc/**/*.html";
+
+plan("docTest").Inputs = [plan(["doc" "pcode"]), "test/doc/**/*.m"];
+
+plan("install").Dependencies = "integTest";
+plan("integTest").Dependencies = "toolbox";
+plan("integTest").Inputs = ["toolbox", "tests"];
+
+plan("lintAll") = matlab.buildtool.Task("Description","Find code issues in source and tests");
+plan("lintAll").Dependencies = ["lint", "lintTests"];
+
+plan.DefaultTasks = "integTest";
+end
 
 function lintTask(context)
 % Find static codeIssues
@@ -204,13 +247,14 @@ end
 
 if ismissing(task)
     outputs = [ctx.Plan.Tasks.Outputs];
+    v = extract(string(version), textBoundary + digitsPattern + "." + digitsPattern + "." + digitsPattern + "." + digitsPattern);
+    deleteFolders(fullfile(".buildtool",v)); 
 else
     outputs = [ctx.Plan(task).Outputs];
 end
 
 deleteFiles(outputs.paths);
-v = extract(string(version), textBoundary + digitsPattern + "." + digitsPattern + "." + digitsPattern + "." + digitsPattern);
-deleteFolders(fullfile(".buildtool",v)); 
+
 end
 
 function registerForClean(files,options)
@@ -316,10 +360,10 @@ issues = codeIssues(paths);
 errorIdx = issues.Issues.Severity == "error";
 errors = issues.Issues(errorIdx,:);
 disp("Errors:")
-disp(formattedDisplayText(errors,"SuppressMarkup",feature("hotlinks")));
+disp(formattedDisplayText(errors));
 assert(isempty(errors), "Found critical errors in code." );
 disp("Other Issues:")
-disp(formattedDisplayText(issues.Issues(~errorIdx,:),"SuppressMarkup",feature("hotlinks")));
+disp(formattedDisplayText(issues.Issues(~errorIdx,:)));
 
 if ~isempty(issues.SuppressedIssues)
     disp("Some issues were suppressed")

@@ -4,6 +4,7 @@ function design = springMassDamperDesign(mass)
 % You can't see inside but I can let you know 
 % how to use it.
 
+
 if nargin
   m = mass; %#ok<NASGU>
 else
