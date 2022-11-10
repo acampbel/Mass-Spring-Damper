@@ -2,7 +2,7 @@ function design = springMassDamperDesign(mass)
 % This is the proprietary design of our toolbox
 % 
 % You can't see inside but I can let you know 
-% how to use it.
+% how to use it if you want.
 
 
 if nargin
