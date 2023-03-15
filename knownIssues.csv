@@ -1,0 +1,3 @@
+RelativeFilename,Severity,Description,CheckID,LineStart,LineEnd,ColumnStart,ColumnEnd
+toolbox/springMassDamperDesign.m,warning,Value assigned to variable might be unused.,NASGU,4,4,3,3
+toolbox/springMassDamperDesign.m,warning,Value assigned to variable might be unused.,NASGU,6,6,3,3
