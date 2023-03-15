@@ -1,0 +1,3 @@
+function codeWarning
+
+anUnusedVariable = "unused";
