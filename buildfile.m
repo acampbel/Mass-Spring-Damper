@@ -2,14 +2,9 @@ function plan = buildfile
 
 plan = buildplan(localfunctions);
 
-plan("test").Dependencies = ["mex", "setup"];
+plan("test").Dependencies = "mex";
 
 plan.DefaultTasks = "test";
-end
-
-function setupTask(context)
-% Setup path for the build
-addpath(fullfile(context.Plan.RootFolder,"toolbox"));
 end
 
 function mexTask(~)
@@ -21,7 +16,7 @@ end
 function testTask(~)
 % Run the unit tests
 
-results = runtests("tests");
+results = runtests;
 disp(results);
 assertSuccess(results);
 end
