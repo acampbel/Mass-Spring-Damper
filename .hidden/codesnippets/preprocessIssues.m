@@ -1,16 +1,13 @@
 function theTable = preprocessIssues(theTable)
 % Make an issues table conducive for baselining via a few small tweaks
 
-% Make the Full Filenames in the table Relative
-varNames = theTable.Properties.VariableNames;
-varNames{varNames == "FullFilename"} = 'RelativeFilename';
-theTable.Properties.VariableNames = varNames;
-theTable.RelativeFilename = replace(theTable.RelativeFilename, string(pwd)+filesep, "");
-theTable = movevars(theTable,"RelativeFilename",'Before',1);
-
-% Remove the Location, which can have links/references to full paths
-theTable.Location = [];
+% Overwrite the location field with relative paths, and remove absolute paths
+basePath = string(pwd) + filesep;
+theTable.Location = erase(theTable.FullFilename, basePath);
+theTable.Properties.VariableNames{"Location"} = 'RelativeFilename';
+theTable.FullFilename = [];
 
 % Convert the Severity to categorical, which serializes nicely to string
 theTable.Severity = categorical(theTable.Severity);
+
 end

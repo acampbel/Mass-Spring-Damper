@@ -1,10 +1,10 @@
 %% 
-% Who among us doesn't have issues amirite? Let's just take a moment and
+% Who among us doesn't have issues, amirite? Let's just take a moment and
 % acknowledge this fact and I think we can always be a bit more honest and
 % understanding of all of our unique issues and the various idiosyncrasies
 % we exhibit. While we can all offer understanding and grace to each other,
 % some of the issues we face can be important to address quickly, and some
-% we can perhaps choose to work on  when the time is right.
+% we can perhaps choose to work on when the time is right.
 % 
 % ...and so it is with our code. Issues, bugs, and other sub-optimal
 % constructs crop up all the time in any serious codebase. Many of you are
@@ -37,11 +37,11 @@
 %
 % You can see that with just a simple call to codeIssues you can quickly
 % get an overview of all the details a static analyzer dreams of. You can
-% easily dig into the files that were analyzed, the configuration, and also
-% will notice a very handy table of the issues found, as well as any issues
-% that have been suppressed through suppression pragmas in the editor. If
-% you are in MATLAB you can even click on each issue to get right to it in
-% the MATLAB editor where it can be fixed or suppressed if needed.
+% easily dig into the files that were analyzed, the configuration, and the
+% very handy table of the issues found, as well as any issues that have
+% been suppressed through suppression pragmas in the editor. If you are in
+% MATLAB you can even click on each issue to get right to it in the MATLAB
+% editor where it can be fixed or suppressed if needed.
 %
 % Now with this beautiful API at our fingertips, and with the build tool to
 % boot, we can lock down our code in a much more robust, automated way. We
@@ -51,12 +51,12 @@
 % <include>.hidden/starting_build/buildfile.m</include>
 %
 % Let's go ahead and add a "codeIssues" task to this build by creating a new
-% local function called *|codeIssuesTask|*
+% local function called *|codeIssuesTask|*:
 %
 % <include>.hidden/codesnippets/codeIssuesTask1.m</include>
 %
 % This is quite simple, we just want to find all the issues under the
-% toolbox folder and throw an assertion error if any of them are of
+% "toolbox" folder and throw an assertion error if any of them are of
 % Severity "error". This is just about the quickest win you can apply to a
 % code base to build quality into it. This can find syntax and other errors
 % statically, without even writing or running a single test. There really
@@ -120,18 +120,20 @@ buildtool
 %
 % We can do this by capturing and saving our existing warnings to a
 % baseline of known issues. As MATLAB tables, theses issues are in a nice
-% representation to save in a *.csv or *.xls file. Saving them in this
+% representation to save in a *.csv or *.xlsx file. Saving them in this
 % format makes it really easy to tweak them, open them outside of MATLAB,
 % or even remove issues that have been fixed.
 % 
 % To do this we just need to make a couple tweaks to the issues table. We
-% need to remove the *|Location|* variable, adjust the
-% *|FullFilename|* variable to contain a *|RelativeFilename|* array, and
-% various datatype tweaks to make for good CSV'ing. The relative filename
-% is an important tweak, because we want to be able to compare from the
-% project root folder, but the full path is likely to differ from machine
-% to machine, whether that is two engineers trying to collaborate or
-% different build agents in a CI system. That function looks as follows:
+% need to overwrite the *|Location|* variable with relative paths to the
+% files, remove the *|FullFilename|* variable, and make a quick datatype
+% tweak to allow for nice CSV'ing. The relative filename adjustment is
+% important because we want to be able to compare these results across
+% different machines and the full path is likely to differ across
+% environments. Such environments include the desktops of individual
+% engineers as well as different build agents in a CI system. 
+% 
+% That function looks as follows:
 %
 % <include>.hidden/codesnippets/preprocessIssues.m</include>
 %
@@ -195,9 +197,9 @@ delete toolbox/codeWarning.m
 %
 % <include>buildfile.m</include>
 %
-% There you have it, a clean API for MATLAB's code analysis, a standard way
+% There you have it, a clean API for MATLAB's code analysis and a standard way
 % to include this in the development process using the build tool. I can
-% practically feel the quality getting higher. 
+% practically feel the quality getting higher!
 %
 % Folks, there is so much to blog about in the next little while. There's
 % more to discuss here on how we can leverage new and improving tools to
