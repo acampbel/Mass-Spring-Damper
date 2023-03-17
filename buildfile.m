@@ -33,10 +33,11 @@ else
 end
 
 
-otherIssues = preprocessIssues(otherIssues);
-% Load the the known warnings baseline
+% Load the known warnings baseline
 newWarnings = [];
 if isfile("knownIssues.csv")
+    otherIssues = preprocessIssues(otherIssues);
+    
     opts = detectImportOptions("knownIssues.csv");
     types = varfun(@class, otherIssues,"OutputFormat","cell");
     opts.VariableTypes = types;
@@ -73,9 +74,9 @@ allIssues = codeIssues("toolbox");
 warningIdx = allIssues.Issues.Severity == "warning";
 warnings = allIssues.Issues(warningIdx,:);
 
-warnings =  preprocessIssues(warnings);
+warnings = preprocessIssues(warnings);
 if ~isempty(warnings)
-    disp("Saving a new ""knownIssues.csv"" baseline file for code warnings")
+    disp("Saving a new ""knownIssues.csv"" baseline file for " + height(warnings) + " code warnings")
     writetable(warnings, "knownIssues.csv");
 else
     disp("No warnings to create a baseline for")

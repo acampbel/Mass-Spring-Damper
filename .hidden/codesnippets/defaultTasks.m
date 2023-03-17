@@ -1,1 +1,1 @@
-plan.DefaultTasks = ["lint" "test"];
+plan.DefaultTasks = ["codeIssues" "test"];

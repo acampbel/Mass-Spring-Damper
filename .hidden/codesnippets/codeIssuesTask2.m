@@ -13,11 +13,11 @@ else
     disp("No critical errors found.");
 end
 
-
-otherIssues = preprocessIssues(otherIssues);
-% Load the the known warnings baseline
+% Load the known warnings baseline
 newWarnings = [];
 if isfile("knownIssues.csv")
+    otherIssues = preprocessIssues(otherIssues);
+    
     % Load the baseline file
     opts = detectImportOptions("knownIssues.csv");
     types = varfun(@class, otherIssues,"OutputFormat","cell");
