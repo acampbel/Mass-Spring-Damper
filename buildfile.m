@@ -55,6 +55,7 @@ function docTestTask(~)
 % Test the doc and examples
 
 results = runtests("tests/doc");
+save("toolbox/test-results.mat", "results");
 disp(results);
 assertSuccess(results);
 end

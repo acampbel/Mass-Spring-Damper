@@ -44,6 +44,15 @@ jobs:
         uses: matlab-actions/run-build@v1
         with: 
           tasks: test
+
+      - name: Upload Test Results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          # Artifact name
+          name: Test-Artifacts-${{ matrix.release }}-${{ matrix.platform }}
+          # A file, directory or wildcard pattern that describes what to uplod
+          path: toolbox/test-results.mat
           
       - name: Upload Mex Files
         if: ${{ always() }}
