@@ -5,6 +5,8 @@ plan = buildplan(localfunctions);
 plan("test").Dependencies = ["mex", "pcode","setup"];
 plan("toolbox").Dependencies = ["lint", "test", "doc"];
 
+plan("rerunFailed").Dependencies = "pcode";
+
 plan("doc").Dependencies = "docTest";
 plan("docTest").Dependencies = "setup";
 
@@ -157,6 +159,10 @@ end
 function installTask(~)
 % Install the toolbox locally
 matlab.addons.toolbox.installToolbox("release/Mass-Spring-Damper.mltbx");
+end
+
+function rerunFailedTask(~)
+rerunFailedTests("artifact.zip");
 end
 
 
