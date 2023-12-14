@@ -1,4 +1,5 @@
 function plan = buildfile
+import matlab.buildtool.tasks.*;
 
 plan = buildplan(localfunctions);
 
@@ -8,43 +9,48 @@ plan("mex").Outputs = files(plan, ...
     .replace("mex/","toolbox/") ...
     .replace(".c", "." + mexext));
 
-plan("pcode").Inputs = files(plan, "pcode/**/*.m");
-plan("pcode").Outputs = files(plan, ...
-    plan("pcode").Inputs.paths ...
-    .replace("pcode/","toolbox/") ...
-    .replace(".m",".p"));
+plan("pcode") = PcodeTask("pcode","toolbox");
+%plan("pcode").Dependencies = "pcodeHelp";
 
-plan("pcode").Dependencies = "pcodeHelp";
+plan("pcodeHelp").Inputs = "pcode/**/*.m";
+plan("pcodeHelp").Outputs = plan("pcodeHelp").Inputs ...
+    .replace("pcode/", "toolbox/");
 
-plan("pcodeHelp").Inputs = plan("pcode").Inputs;
-plan("pcodeHelp").Outputs = files(plan, ...
-    plan("pcodeHelp").Inputs.paths ...
-    .replace("pcode/", "toolbox/"));
+plan("lint") = CodeIssuesTask(["toolbox/**/*.m", "pcode/**/*.m"]);
+plan("lintTests") = CodeIssuesTask("tests");
 
-plan("lint").Inputs = files(plan, ["toolbox/**/*.m", "pcode/**/*.m"]);
 
-plan("test").Inputs = [...
-    plan("mex").Outputs, ...
-    plan("pcode").Outputs, ...
-    files(plan, "toolbox/**/*.m")];
+plan("test") = TestTask("tests",SourceFiles=["toolbox","pcode"], ...
+    TestResults="results/test-results/index.html",...
+    CodeCoverageResults="results/coverage/index.html", ...
+    Dependencies=["mex", "pcode"]);
+
+
+plan("archiveResults").Dependencies = "test";
+plan("archiveResults").Inputs = "results/*";
+plan("archiveResults").Outputs = transform(plan("archiveResults").Inputs,@(p) p + ".zip");
+
+plan("docTest") = TestTask("tests/doc",SourceFiles="toolbox/doc");
 
 plan("toolbox").Dependencies = ["lint", "test", "doc", "pcodeHelp"];
-plan("toolbox").Inputs = files(plan, ["pcode", "mex", "toolbox", "ToolboxPackaging.prj"]);
-plan("toolbox").Outputs = files(plan, "release/*.mltbx");
+plan("toolbox").Inputs = ["pcode", "mex", "toolbox", "ToolboxPackaging.prj"];
+plan("toolbox").Outputs = "release/*.mltbx";
 
 plan("doc").Dependencies = "docTest";
-plan("doc").Inputs = files(plan, "toolbox/doc/**/*.mlx");
-plan("doc").Outputs = files(plan, plan("doc").Inputs.paths ...
-    .replace(".mlx",".html"));
+plan("doc").Inputs = "toolbox/doc/**/*.mlx";
 
-plan("docTest").Inputs = [...
-    plan("doc").Inputs, ...
-    plan("pcode").Outputs, ...
-    files(plan, "test/doc/**/*.m")];
+
+plan("clean") = CleanTask;
+%plan("doc").Outputs = plan("doc").Inputs.replace(".mlx",".html");
+
+%plan("docTest").Inputs = [...
+ %   plan("doc").Inputs, ...
+  %  plan("pcode").Outputs, ...
+   %  "test/doc/**/*.m"];
 
 plan("integTest").Inputs = [...
     plan("toolbox").Outputs, ...
-    files(plan, "tests")];
+    "tests"];
 
 
 plan("install").Dependencies = "integTest";
@@ -53,48 +59,26 @@ plan("lintAll") = matlab.buildtool.Task(...
     Description="Find code issues in source and tests",...
     Dependencies=["lint", "lintTests"]);
 
-plan.DefaultTasks = "integTest";
+plan.DefaultTasks = "archiveResults";
 end
 
+function archiveResultsTask(cxt)
+% Create ZIP file
+subdirs = cxt.Task.Inputs.paths;
 
-function lintTask(context)
-% Find static codeIssues
-lintFcn(fileparts(context.Inputs.paths));
+zipFiles = cxt.Task.Outputs.paths;
 
+for idx = 1:numel(subdirs)
+    zip(zipFiles(idx),subdirs(idx) + filesep + "*")
+end
 end
 
-function lintTestsTask(~)
-% Find code issues in test code
-lintFcn("tests");
-end
-
-function lintFcn(paths)
-issues = codeIssues(paths);
-errorIdx = issues.Issues.Severity == "error";
-errors = issues.Issues(errorIdx,:);
-disp("Errors:")
-disp(formattedDisplayText(errors));
-assert(isempty(errors), "Found critical errors in code." );
-disp("Other Issues:")
-disp(formattedDisplayText(issues.Issues(~errorIdx,:)));
-
-if ~isempty(issues.SuppressedIssues)
-    disp("Some issues were suppressed")
-    disp(formattedDisplayText(groupsummary(issues.SuppressedIssues,"Severity"),"SuppressMarkup",feature("hotlinks")));
-end
-
-end
-
-function loadTask(ctx)
-% Load the project
-matlab.project.loadProject(ctx.Plan.RootFolder);
-end
 
 function mexTask(context)
 % Compile mex files
 
-inputs = context.Inputs.paths;
-outputs = context.Outputs.paths;
+inputs = context.Task.Inputs.paths;
+outputs = context.Task.Outputs.paths;
 
 for idx = 1:numel(inputs)
     thisInput = inputs(idx);
@@ -132,23 +116,6 @@ for idx = 1:numel(docFiles)
 end
 end
 
-function docTestTask(~)
-% Test the doc and examples
-
-results = runtests("tests/doc");
-disp(results);
-assertSuccess(results);
-end
-
-function testTask(~)
-% Run the unit tests
-
-results = runtests("tests");
-disp(results);
-assertSuccess(results);
-end
-
-
 function toolboxTask(~)
 % Create an mltbx toolbox package
 outputFile = "release/msd.mltbx";
@@ -160,12 +127,12 @@ end
 function pcodeHelpTask(context)
 % Extract help text for p-coded m-files
 
-outputPaths = context.Outputs.paths;
+outputPaths = context.Task.Outputs.paths;
 
-for idx = 1:numel(context.Inputs.paths)
+for idx = 1:numel(context.Task.Inputs.paths)
 
     % Grab the help text for the pcoded function to generate a help-only m-file
-    mfile = context.Inputs.paths{idx};
+    mfile = context.Task.Inputs.paths{idx};
 
     helpText = deblank(string(help(mfile)));
     helpText = split(helpText,newline);
@@ -186,28 +153,6 @@ for idx = 1:numel(context.Inputs.paths)
 end
 end
 
-function pcodeTask(context)
-% Obfuscate m-files
-
-startDir = pwd;
-cleaner = onCleanup(@() cd(startDir));
-
-srcFolders = unique(fileparts(context.Inputs.paths));
-outFolders = unique(fileparts(context.Outputs.paths));
-
-rootFolder = context.Plan.RootFolder;
-for idx = 1:numel(srcFolders)
-    disp("P-coding files in " + srcFolders(idx));
-    % Now pcode the file
-    outFolder = fullfile(rootFolder, outFolders(idx));
-    srcFolder = fullfile(rootFolder, srcFolders(idx));
-
-    makeFolder(outFolder);
-
-    cd(outFolder);
-    pcode(srcFolder);
-end
-end
 
 function makeFolder(folder)
 if exist(folder,"dir")
@@ -217,25 +162,6 @@ disp("Creating """ + folder + """ folder");
 mkdir(folder);
 end
 
-function cleanTask(ctx, task)
-% Clean all derived artifacts
-
-arguments
-    ctx
-    task (1,:) string = missing;
-end
-
-if ismissing(task)
-    outputs = [ctx.Plan.Tasks.Outputs];
-    v = extract(string(version), textBoundary + digitsPattern + "." + digitsPattern + "." + digitsPattern + "." + digitsPattern);
-    deleteFolders(fullfile(".buildtool",v));
-else
-    outputs = [ctx.Plan(task).Outputs];
-end
-
-deleteFiles(outputs.paths);
-
-end
 
 function integTestTask(ctx)
 % Run integration tests
@@ -271,37 +197,6 @@ function installTask(~)
 matlab.addons.toolbox.installToolbox("release/Mass-Spring-Damper.mltbx");
 end
 
-
-function deleteFiles(files)
-
-arguments
-    files string
-end
-
-for file = files(:).'
-    if ~isempty(file) && exist(file,"file")
-        disp("Deleting file: " + file);
-        delete(file);
-    end
-end
-end
-
-function deleteFolders(folders)
-
-arguments
-    folders string;
-end
-
-oldWarn = warning("off",'MATLAB:RMDIR:RemovedFromPath');
-cl = onCleanup(@() warning(oldWarn));
-
-for folder = folders(:).'
-    if exist(folder,"dir")
-        disp("Deleting folder: " + folder);
-        rmdir(folder, "s");
-    end
-end
-end
 
 
 
