@@ -27,8 +27,9 @@ plan("test") = TestTask("tests",SourceFiles=["toolbox","pcode"], ...
 
 
 plan("archiveResults").Dependencies = "test";
-plan("archiveResults").Inputs = "results/*";
-plan("archiveResults").Outputs = transform(plan("archiveResults").Inputs,@(p) p + ".zip");
+plan("archiveResults").Inputs = "results/*/";
+plan("archiveResults").Outputs = transform(plan("archiveResults").Inputs,...
+    @(p) p.replaceBetween(strlength(p),strlength(p), ".zip"));
 
 plan("docTest") = TestTask("tests/doc",SourceFiles="toolbox/doc");
 
