@@ -54,11 +54,11 @@ jobs:
         MATLAB_Compiler
         MATLAB_Compiler_SDK
         MATLAB_Test
- 
   # This task Runs all the MATLAB and Simulink tests and generate variety of test artifacts. Check the documentation for all supported task parameters.
   - task: RunMATLABBuild@1
     inputs:
       tasks: test
+      
     env:
       MLM_LICENSE_TOKEN: $(MLM_LICENSE_TOKEN)
        
