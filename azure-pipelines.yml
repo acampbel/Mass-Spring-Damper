@@ -17,15 +17,15 @@ jobs:
 
   strategy:
     matrix:    
-      windows-MATLAB-R2022b:
+      windows-MATLAB-R2023a:
         PLATFORM: 'windows-latest'
-        MATLAB_RELEASE: R2022b
-      linux-MATLAB-R2022b:
+        MATLAB_RELEASE: R2023a
+      linux-MATLAB-R2023a:
         PLATFORM: 'ubuntu-latest'
-        MATLAB_RELEASE: R2022b
-      mac-MATLAB-R2022b:
+        MATLAB_RELEASE: R2023a
+      mac-MATLAB-R2023a:
         PLATFORM: 'macOS-latest'
-        MATLAB_RELEASE: R2022b
+        MATLAB_RELEASE: R2023a
         
       windows-MATLAB-R2024a:
         PLATFORM: 'windows-latest'
@@ -44,7 +44,7 @@ jobs:
   steps:
   - task: Cache@2
     inputs:
-      key: MATLAB-$(MATLAB_RELEASE)-$(PLATFORM)-20240329a
+      key: MATLAB-$(MATLAB_RELEASE)-$(PLATFORM)-20240329b
       path: $(AGENT_TOOLSDIRECTORY)/MATLAB
   - task: InstallMATLAB@1
     inputs:
