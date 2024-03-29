@@ -3,8 +3,8 @@ trigger:
 
 
 schedules:
-- cron: '43/61 13/25 1/6 * *'
-  displayName: Weekly-ish build
+- cron: '57 23 * * 1'
+  displayName: Weekly build to keep cache warm
   branches:
     include:
     - main
@@ -16,36 +16,27 @@ jobs:
     vmImage: $(PLATFORM)
 
   strategy:
-    matrix:
-      windows-MATLAB-R2022b:
+    matrix:    
+      windows-MATLAB-R2021a:
         PLATFORM: 'windows-latest'
-        MATLAB_RELEASE: R2022b
-      linux-MATLAB-R2022b:
+        MATLAB_RELEASE: R2021a
+      linux-MATLAB-R2021a:
         PLATFORM: 'ubuntu-latest'
-        MATLAB_RELEASE: R2022b
-      mac-MATLAB-R2022b:
+        MATLAB_RELEASE: R2021a
+      mac-MATLAB-R2021a:
         PLATFORM: 'macOS-latest'
-        MATLAB_RELEASE: R2022b
+        MATLAB_RELEASE: R2021a
         
-      windows-MATLAB-R2023a:
+      windows-MATLAB-R2024a:
         PLATFORM: 'windows-latest'
-        MATLAB_RELEASE: R2023a
-      linux-MATLAB-R2023a:
+        MATLAB_RELEASE: R2024a
+      linux-MATLAB-R2024a:
         PLATFORM: 'ubuntu-latest'
-        MATLAB_RELEASE: R2023a
-      mac-MATLAB-R2023a:
+        MATLAB_RELEASE: R2024a
+      mac-MATLAB-R2024a:
         PLATFORM: 'macOS-latest'
-        MATLAB_RELEASE: R2023a
-        
-      windows-MATLAB-R2023b:
-        PLATFORM: 'windows-latest'
-        MATLAB_RELEASE: R2023b
-      linux-MATLAB-R2023b:
-        PLATFORM: 'ubuntu-latest'
-        MATLAB_RELEASE: R2023b
-      mac-MATLAB-R2023b:
-        PLATFORM: 'macOS-latest'
-        MATLAB_RELEASE: R2023b
+        MATLAB_RELEASE: R2024a
+
         
   variables: 
   - group: matlab-batch-license
@@ -53,7 +44,7 @@ jobs:
   steps:
   - task: Cache@2
     inputs:
-      key: MATLAB-$(MATLAB_RELEASE)-$(PLATFORM)-20231028
+      key: MATLAB-$(MATLAB_RELEASE)-$(PLATFORM)-20240329
       path: $(AGENT_TOOLSDIRECTORY)/MATLAB
   - task: InstallMATLAB@1
     inputs:
@@ -76,6 +67,5 @@ jobs:
     inputs:
       tasks: test
     env:
-      MATHWORKS_ACCOUNT: $(MATHWORKS_ACCOUNT)
-      MATHWORKS_TOKEN: $(MATHWORKS_TOKEN)
+      MLM_LICENSE_TOKEN: $(MLM_LICENSE_TOKEN)
        
