@@ -44,7 +44,7 @@ jobs:
   steps:
   - task: Cache@2
     inputs:
-      key: MATLAB-$(MATLAB_RELEASE)-$(PLATFORM)-20240329b
+      key: MATLAB-$(MATLAB_RELEASE)-$(PLATFORM)-20240329c
       path: $(AGENT_TOOLSDIRECTORY)/MATLAB
   - task: InstallMATLAB@1
     inputs:
