@@ -19,13 +19,13 @@ jobs:
     matrix:    
       windows-MATLAB-R2021a:
         PLATFORM: 'windows-latest'
-        MATLAB_RELEASE: R2021a
+        MATLAB_RELEASE: R2022b
       linux-MATLAB-R2021a:
         PLATFORM: 'ubuntu-latest'
-        MATLAB_RELEASE: R2021a
+        MATLAB_RELEASE: R2022b
       mac-MATLAB-R2021a:
         PLATFORM: 'macOS-latest'
-        MATLAB_RELEASE: R2021a
+        MATLAB_RELEASE: R2022b
         
       windows-MATLAB-R2024a:
         PLATFORM: 'windows-latest'
