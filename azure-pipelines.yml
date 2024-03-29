@@ -17,13 +17,13 @@ jobs:
 
   strategy:
     matrix:    
-      windows-MATLAB-R2021a:
+      windows-MATLAB-R2022b:
         PLATFORM: 'windows-latest'
         MATLAB_RELEASE: R2022b
-      linux-MATLAB-R2021a:
+      linux-MATLAB-R2022b:
         PLATFORM: 'ubuntu-latest'
         MATLAB_RELEASE: R2022b
-      mac-MATLAB-R2021a:
+      mac-MATLAB-R2022b:
         PLATFORM: 'macOS-latest'
         MATLAB_RELEASE: R2022b
         
