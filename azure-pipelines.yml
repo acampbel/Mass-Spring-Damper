@@ -44,7 +44,7 @@ jobs:
   steps:
   - task: Cache@2
     inputs:
-      key: MATLAB-$(MATLAB_RELEASE)-$(PLATFORM)-20240329
+      key: MATLAB-$(MATLAB_RELEASE)-$(PLATFORM)-20240329a
       path: $(AGENT_TOOLSDIRECTORY)/MATLAB
   - task: InstallMATLAB@1
     inputs:
@@ -53,14 +53,7 @@ jobs:
         MATLAB
         MATLAB_Compiler
         MATLAB_Compiler_SDK
-        Database_Toolbox
-        Datafeed_Toolbox
-        Econometrics_Toolbox
-        Financial_Instruments_Toolbox
-        Financial_Toolbox
-        Optimization_Toolbox
-        Parallel_Computing_Toolbox
-        Statistics_and_Machine_Learning_Toolbox
+        MATLAB_Test
  
   # This task Runs all the MATLAB and Simulink tests and generate variety of test artifacts. Check the documentation for all supported task parameters.
   - task: RunMATLABBuild@1
