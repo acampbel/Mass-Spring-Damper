@@ -63,7 +63,7 @@ jobs:
         Statistics_and_Machine_Learning_Toolbox
  
   # This task Runs all the MATLAB and Simulink tests and generate variety of test artifacts. Check the documentation for all supported task parameters.
-  - task: RunMATLABBuild@0
+  - task: RunMATLABBuild@1
     inputs:
       tasks: test
     env:
