@@ -44,7 +44,7 @@ jobs:
   steps:
   - task: Cache@2
     inputs:
-      key: "MATLAB-$(MATLAB_RELEASE)" | "$(PLATFORM)" | azure-pipelines.yml
+      key: MATLAB-$(MATLAB_RELEASE) | $(PLATFORM) | azure-pipelines.yml
       path: $(AGENT_TOOLSDIRECTORY)/MATLAB
       
   - task: InstallMATLAB@1
