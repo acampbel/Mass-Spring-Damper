@@ -42,10 +42,10 @@ jobs:
   - group: matlab-batch-license
  
   steps:
-  #- task: Cache@2
-   # inputs:
-    #  key: MATLAB-$(MATLAB_RELEASE) | $(PLATFORM) | azure-pipelines.yml
-     # path: $(AGENT_TOOLSDIRECTORY)/MATLAB
+  - task: Cache@2
+    inputs:
+      key: MATLAB-$(MATLAB_RELEASE) | $(PLATFORM) | azure-pipelines.yml
+      path: $(AGENT_TOOLSDIRECTORY)/MATLAB
       
   - task: InstallMATLAB@1
     inputs:
